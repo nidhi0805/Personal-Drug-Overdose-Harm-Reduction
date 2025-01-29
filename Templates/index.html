@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keyword Sentiment and Topics Search</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
@@ -28,38 +28,44 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
-            $('#search-form').on('submit', function (event) {
-                event.preventDefault();
-                const keyword = $('#keyword').val();
-                
-                $.post('/search', { keyword: keyword }, function (response) {
-                    // Show results
-                    $('#results').show();
-                    $('#keyword-result').text(response.keyword);
-                    
-                    // Sentiment Display (Handling as an Object)
-                    let sentimentHtml = '<ul>';
-                    if (typeof response.sentiment === 'object') {
-                        for (let sentiment in response.sentiment) {
-                            sentimentHtml += `<li>${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}: ${response.sentiment[sentiment]}</li>`;
-                        }
-                    } else {
-                        sentimentHtml = `<p>${response.sentiment}</p>`;  // Handle as a simple string
-                    }
-                    sentimentHtml += '</ul>';
-                    $('#sentiment-result').html(sentimentHtml);
+    $('#search-form').on('submit', function (event) {
+        event.preventDefault();
+        const keyword = $('#keyword').val();
 
-                    // Populate People Associated
-                    $('#people-result').text(response.associated_people);
+        // Clear previous results
+        $('#results').hide();
+        $('#topics-list').empty();  // Clear the previous list of topics
+        $('#sentiment-result').empty();  // Clear the previous sentiment data
+        $('#people-result').empty();  // Clear the previous people data
 
-                    // Populate Topics
-                    $('#topics-list').empty();
-                    response.topics.forEach(function (topic) {
-                        $('#topics-list').append('<li>' + topic + '</li>');
-                    });
-                });
+        $.post('/search', { keyword: keyword }, function (response) {
+            // Show the new results
+            $('#results').show();
+            $('#keyword-result').text(response.keyword);
+            
+            // Display Sentiment (Handling as an Object)
+            let sentimentHtml = '<ul>';
+            if (typeof response.sentiment === 'object') {
+                for (let sentiment in response.sentiment) {
+                    sentimentHtml += `<li>${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}: ${response.sentiment[sentiment]}</li>`;
+                }
+            } else {
+                sentimentHtml = `<p>${response.sentiment}</p>`;  // Handle as a simple string
+            }
+            sentimentHtml += '</ul>';
+            $('#sentiment-result').html(sentimentHtml);
+
+            // Populate People Associated
+            $('#people-result').text(response.associated_people);
+
+            // Populate Topics
+            $('#topics-list').empty();  // Clear any previous topics
+            response.topics.forEach(function (topic) {
+                $('#topics-list').append('<li>' + topic + '</li>');
             });
         });
+    });
+});
     </script>
 </body>
 </html>
