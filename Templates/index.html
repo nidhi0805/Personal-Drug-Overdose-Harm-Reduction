@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyword Sentiment and Topics Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Search for Related Topics and Sentiments</h1>
+        <form id="search-form">
+            <input type="text" id="keyword" name="keyword" placeholder="Enter a keyword..." required>
+            <button type="submit">Search</button>
+        </form>
+
+        <div id="results" style="display:none;">
+            <h2>Results for: <span id="keyword-result"></span></h2>
+            <h3>Related Topics:</h3>
+            <ul id="topics-list"></ul>
+            <h3>Sentiment:</h3>
+            <p id="sentiment-result"></p>
+            <h3>People Associated:</h3>
+            <p id="people-result"></p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#search-form').on('submit', function (event) {
+                event.preventDefault();
+                const keyword = $('#keyword').val();
+                
+                $.post('/search', { keyword: keyword }, function (response) {
+                    // Show results
+                    $('#results').show();
+                    $('#keyword-result').text(response.keyword);
+                    
+                    // Sentiment Display (Handling as an Object)
+                    let sentimentHtml = '<ul>';
+                    if (typeof response.sentiment === 'object') {
+                        for (let sentiment in response.sentiment) {
+                            sentimentHtml += `<li>${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}: ${response.sentiment[sentiment]}</li>`;
+                        }
+                    } else {
+                        sentimentHtml = `<p>${response.sentiment}</p>`;  // Handle as a simple string
+                    }
+                    sentimentHtml += '</ul>';
+                    $('#sentiment-result').html(sentimentHtml);
+
+                    // Populate People Associated
+                    $('#people-result').text(response.associated_people);
+
+                    // Populate Topics
+                    $('#topics-list').empty();
+                    response.topics.forEach(function (topic) {
+                        $('#topics-list').append('<li>' + topic + '</li>');
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
