@@ -1,17 +1,30 @@
-
 import os
 import pandas as pd
 from flask import Flask, render_template, request, jsonify
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-app = Flask(__name__, template_folder='/Users/nidhipatel/Desktop/Classes/Winter25/Experiential Learning/Individual XN-Repo/Drug-Overdose-Harm-Reduction/Templates')
+#  Dynamically set the base directory
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-# Load the datasets
-combined_data = pd.read_csv('/Users/nidhipatel/Desktop/Classes/Winter25/Experiential Learning/Individual XN-Repo/Drug-Overdose-Harm-Reduction/Dataset/combined_healthcare_reddit_data_praw.csv', encoding='utf-8')
-cleaned_data = pd.read_csv('/Users/nidhipatel/Desktop/Classes/Winter25/Experiential Learning/Individual XN-Repo/Drug-Overdose-Harm-Reduction/Dataset/cleaned_healthcare_reddit_data_praw.csv', encoding='utf-8')
-sentiment_data = pd.read_csv('/Users/nidhipatel/Desktop/Classes/Winter25/Experiential Learning/Individual XN-Repo/Drug-Overdose-Harm-Reduction/Dataset/sentiment_healthcare_reddit_data.csv', encoding='utf-8')
-topics_data = pd.read_csv('/Users/nidhipatel/Desktop/Classes/Winter25/Experiential Learning/Individual XN-Repo/Drug-Overdose-Harm-Reduction/Dataset/topics.csv', encoding='utf-8')
+#  Set Flask template folder correctly
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "Templates"))
+
+#  Load datasets using relative paths
+DATASET_DIR = os.path.join(BASE_DIR, "Dataset")
+
+def load_dataset(filename):
+    file_path = os.path.join(DATASET_DIR, filename)
+    if os.path.exists(file_path):
+        return pd.read_csv(file_path, encoding='utf-8')
+    else:
+        print(f" Warning: {filename} not found. Ensure it's uploaded in the correct directory.")
+        return None
+
+combined_data = load_dataset("combined_healthcare_reddit_data_praw.csv")
+cleaned_data = load_dataset("cleaned_healthcare_reddit_data_praw.csv")
+sentiment_data = load_dataset("sentiment_healthcare_reddit_data.csv")
+topics_data = load_dataset("topics.csv")
 
 # Initialize the SentenceTransformer model for BERT-based embeddings
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
