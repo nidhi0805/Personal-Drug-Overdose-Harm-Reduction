@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <title>Heatmap Visualization</title>
+    <style>
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        var map = L.map('map').setView([37.8, -96], 4);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        fetch('/heatmap-data').then(response => response.json()).then(data => {
+    if (data.length > 0) {
+        // Example: Scale Mentions by multiplying to increase intensity variation
+        var heatData = data.map(item => [item.Latitude, item.Longitude, item.Mentions * 10]); // Adjust multiplier as needed
+        L.heatLayer(heatData, {
+            radius: 25,
+            blur: 15,
+            gradient: {0.2: 'blue', 0.4: 'lime', 0.6: 'yellow', 1: 'red'}
+        }).addTo(map);
+    } else {
+        console.log('No data or incorrect data format for heatmap');
+    }
+}).catch(error => console.error('Error loading heatmap data:', error));
+
+    </script>
+</body>
+</html>
