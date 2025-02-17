@@ -2,10 +2,7 @@ import praw
 import pandas as pd
 from datetime import datetime
 
-<<<<<<< HEAD
-=======
 
->>>>>>> nidhi
 # Initialize Reddit API client
 reddit = praw.Reddit(client_id='q9B_ymm5vW_3Fb-0pm-r9w', 
                      client_secret='dF8iPqxbABZ_5QPGqTrTc2Qtc9cRyg', 
