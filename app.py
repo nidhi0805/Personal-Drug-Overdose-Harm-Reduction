@@ -8,6 +8,7 @@ app = Flask(__name__)
 # Load datasets
 data_df = pd.read_csv("Dataset/drugs_and_context.csv")
 geo_df = pd.read_csv("Dataset/geospatial_insights.csv")
+yearly_trends = pd.read_csv("Dataset/opioid_mentions_yearly.csv")
 
 @app.route("/")
 def index():
@@ -59,6 +60,38 @@ def drug_sentiments(drug):
     print(f"Sentiment counts for {drug}: {sentiment_counts}")
     return jsonify(sentiment_counts)
 
+@app.route("/trend-data/<drug>")
+def trend_data(drug):
+    drug = drug.lower()
+
+    # 🔹 Print column names for debugging
+    print("Columns in yearly_trends:", yearly_trends.columns)
+
+    # 🔹 Ensure correct column names
+    yearly_trends.columns = yearly_trends.columns.str.strip().str.lower()
+
+    # 🔹 Print columns again after conversion
+    print("Updated Columns:", yearly_trends.columns)
+
+    # 🔹 Check if "drugs_mentioned" exists (lowercased version)
+    if "drugs_mentioned" not in yearly_trends.columns:
+        return jsonify({"error": "Column 'drugs_mentioned' not found"}), 500
+
+    # 🔹 Convert column to lowercase for case-insensitive comparison
+    yearly_trends["drugs_mentioned"] = yearly_trends["drugs_mentioned"].str.lower()
+
+    # 🔹 Filter for the selected drug
+    filtered_df = yearly_trends[yearly_trends["drugs_mentioned"] == drug]
+
+    # 🔹 If no data found, return an empty list
+    if filtered_df.empty:
+        print(f"No trend data found for {drug}")
+        return jsonify([])
+
+    # 🔹 Convert to JSON
+    trend_json = filtered_df.to_dict(orient="records")
+    print(f"✅ Returning trend data for {drug}: {trend_json}")
+    return jsonify(trend_json)
 
 @app.route("/heatmap-data")
 def heatmap_data():
