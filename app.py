@@ -75,7 +75,7 @@ def search():
 
 if __name__ == '__main__':
     app.run(debug=True)
-=======
+
 
 from flask import Flask, render_template, jsonify
 import pandas as pd
@@ -106,7 +106,7 @@ def get_drugs():
 @app.route("/drug-sentiments/<drug>")
 def drug_sentiments(drug):
     """Return sentiment counts for a specific drug."""
-    # Ensure 'Drug' and 'Sentiment' columns exist
+    # Ensure Drug and Sentiment columns exist
     if "Drug" not in data_df.columns or "Sentiment" not in data_df.columns:
         return jsonify({"error": "Required columns missing"}), 500
 
@@ -181,4 +181,4 @@ def heatmap_data():
 
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0', port=5001)
->>>>>>> nidhi
+
