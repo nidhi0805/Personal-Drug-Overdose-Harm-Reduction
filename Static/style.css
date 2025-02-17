@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 body {
     font-family: Arial, sans-serif;
 }
@@ -31,7 +31,7 @@ button {
 
 ul {
     list-style-type: none;
-=======
+
 body, html {
     height: 100%;
     margin: 0;
@@ -57,7 +57,7 @@ body, html {
     background-color: #ececec;
 }
 
-/* ✅ Highlight the active drug button */
+/* Highlight the active drug button */
 .drug-btn.active {
     background-color: #007bff;
     color: white;
@@ -90,5 +90,5 @@ body, html {
 
 .heatmap-btn:hover {
     background-color: #0056b3;
->>>>>>> nidhi
+
 }
