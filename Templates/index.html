@@ -11,14 +11,21 @@
 <body>
     <div class="container">
         <h1>Opioid Harm Reduction Insights</h1>
-        <p>Explore drug-related discussions and their sentiments.</p>
+        <p>Explore drug-related discussions and their trends.</p>
 
         <!-- Drug Buttons -->
         <div id="drug-buttons"></div>
 
-        <!-- Chart Container -->
+        <!-- Sentiment Analysis Chart -->
         <div class="chart-container">
+            <p id="loading-message">Select a drug to view sentiment analysis.</p>
             <div id="piechart"></div>
+        </div>
+
+        <!-- Drug-Specific Trend Chart -->
+        <div class="chart-container">
+            <h2 id="trend-title">Trend Analysis</h2>
+            <div id="trendchart"></div>
         </div>
     </div>
 
@@ -26,7 +33,7 @@
     <button onclick="window.open('/heatmap-page', '_blank');" class="heatmap-btn">Open Heatmap</button>
 
     <script>
-        google.charts.load('current', {'packages':['corechart']});
+        google.charts.load('current', {'packages':['corechart', 'line']});
         google.charts.setOnLoadCallback(initialize);
 
         function initialize() {
@@ -38,9 +45,10 @@
                             .addClass('drug-btn')
                             .text(drug)
                             .on('click', function () {
-                                $('.drug-btn').removeClass('active'); // Remove active class from all buttons
-                                $(this).addClass('active'); // Highlight selected button
-                                fetchSentiment(drug); // Fetch sentiment data
+                                $('.drug-btn').removeClass('active');
+                                $(this).addClass('active');
+                                fetchSentiment(drug);
+                                fetchTrendData(drug);
                             });
                         $('#drug-buttons').append(button);
                     });
@@ -49,6 +57,7 @@
         }
 
         function fetchSentiment(drug) {
+            $('#loading-message').text(`Loading sentiment data for ${drug}...`).show();
             $.getJSON(`/drug-sentiments/${drug}`, function (data) {
                 if ($.isEmptyObject(data)) {
                     console.warn("No sentiment data available for", drug);
@@ -56,39 +65,78 @@
                     return;
                 }
 
-                // Convert data to format required by Google Charts
                 var dataArray = [['Sentiment', 'Count']];
                 var colors = [];
 
                 $.each(data, function (key, val) {
                     dataArray.push([key, val]);
                     if (key.toLowerCase() === 'positive') {
-                        colors.push('#4CAF50'); // Green for positive
+                        colors.push('#4CAF50');
                     } else if (key.toLowerCase() === 'negative') {
-                        colors.push('#F44336'); // Red for negative
+                        colors.push('#F44336');
                     } else {
-                        colors.push('#FFC107'); // Yellow for neutral (if applicable)
+                        colors.push('#FFC107');
                     }
                 });
 
                 var dataTable = google.visualization.arrayToDataTable(dataArray);
 
-                // Chart Options
                 var options = {
-                    title: 'Sentiment Analysis',
+                    title: `Sentiment Analysis for ${drug}`,
                     width: 600,
                     height: 400,
-                    pieHole: 0.4, // Creates a donut-style chart
-                    colors: colors, // Use dynamically set colors
+                    pieHole: 0.4,
+                    colors: colors,
                     chartArea: { width: '80%', height: '80%' }
                 };
 
                 var chart = new google.visualization.PieChart(document.getElementById('piechart'));
                 chart.draw(dataTable, options);
+
+                $('#loading-message').hide();
             }).fail(function () {
                 console.error("Failed to fetch sentiment data for " + drug);
             });
         }
+
+        function fetchTrendData(drug) {
+        console.log(`Fetching trend data for ${drug}...`);
+        $('#trend-title').text(`Trend Analysis for ${drug}`);
+
+        $.getJSON(`/trend-data/${drug}`, function (data) {
+            if (data.length === 0) {
+                console.warn("No trend data available for", drug);
+                $('#trendchart').html('<p>No trend data available for ' + drug + '</p>');
+                return;
+            }
+
+            console.log("Trend data received:", data); // ✅ Debugging line
+
+            var dataArray = [['Year', 'Mentions']];
+            data.forEach(function (entry) {
+                dataArray.push([entry.year.toString(), entry.mentions]);
+            });
+
+            var dataTable = google.visualization.arrayToDataTable(dataArray);
+
+            var options = {
+                title: `Opioid Mentions for ${drug} Over Time`,
+                curveType: 'function',
+                legend: { position: 'bottom' },
+                width: 800,
+                height: 400,
+                hAxis: { title: 'Year', format: '####' }, // ✅ Ensure year format is correct
+                vAxis: { title: 'Mentions' },
+                chartArea: { width: '70%', height: '70%' }
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('trendchart'));
+            chart.draw(dataTable, options);
+        }).fail(function () {
+            console.error("Failed to fetch trend data for " + drug);
+            $('#trendchart').html('<p>Error loading trend data.</p>');
+        });
+    }
     </script>
 </body>
 </html>
