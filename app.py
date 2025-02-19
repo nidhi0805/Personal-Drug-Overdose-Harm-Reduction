@@ -8,7 +8,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 #  Set Flask template folder correctly
-app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "Templates"))
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 
 #  Load datasets using relative paths
 DATASET_DIR = os.path.join(BASE_DIR, "Dataset")
