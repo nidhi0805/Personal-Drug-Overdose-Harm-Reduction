@@ -1,10 +1,4 @@
-#!/bin/sh
-<<<<<<< HEAD
-'''exec' "/Users/nidhipatel/Desktop/Classes/Winter25/Experiential Learning/Individual XN-Repo/Drug-Overdose-Harm-Reduction/myenv/bin/python3.11" "$0" "$@"
-=======
-'''exec' "/Users/nidhipatel/Desktop/Classes/Winter25/Experiential Learning/Individual XN-Repo/Drug-Overdose-Harm-Reduction/myenv/bin/python" "$0" "$@"
->>>>>>> nidhi
-' '''
+
 # -*- coding: utf-8 -*-
 import re
 import sys
