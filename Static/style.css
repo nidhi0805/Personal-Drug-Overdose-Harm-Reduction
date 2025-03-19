@@ -1,94 +1,109 @@
-
-body {
-    font-family: Arial, sans-serif;
-}
-
-.container {
-    width: 80%;
-    margin: auto;
-    padding-top: 50px;
-}
-
-h1 {
-    text-align: center;
-}
-
-input[type="text"] {
-    width: 70%;
-    padding: 10px;
-    font-size: 16px;
-    margin-bottom: 10px;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-}
-
-#results {
-    margin-top: 20px;
-}
-
-ul {
-    list-style-type: none;
-
+/* General Page Styling */
 body, html {
     height: 100%;
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
     text-align: center;
 }
 
+/* Main Container */
 .container {
-    padding: 20px;
+    width: 80%;
+    margin: auto;
+    padding: 30px;
+    background: white;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
 }
 
+/* Title Styling */
+h1 {
+    font-size: 26px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Remove Search Bar */
+#search-form {
+    display: none;
+}
+
+/* Drug Selection Buttons */
 .drug-btn {
-    margin: 5px;
-    padding: 10px 20px;
-    border: 1px solid #ddd;
+    margin: 8px;
+    padding: 12px 20px;
+    border: 1px solid #007bff;
     border-radius: 5px;
-    background-color: #f8f8f8;
-    cursor: pointer;
-}
-
-.drug-btn:hover {
-    background-color: #ececec;
-}
-
-/* Highlight the active drug button */
-.drug-btn.active {
     background-color: #007bff;
-    color: white;
-    border-color: #0056b3;
+    color: white; /* ✅ Fix: Ensure text is readable */
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 14px;
+    font-weight: bold;
 }
 
+/* Hover Effect for Drug Buttons */
+.drug-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Active Button */
+.drug-btn.active {
+    background-color: #0056b3;
+    color: #ffffff;
+    border-color: #003d82;
+}
+
+/* Chart Containers */
 .chart-container {
-    width: 50%;
-    margin: 20px auto;
+    width: 60%;
+    margin: 25px auto;
     padding: 20px;
     border: 1px solid #ddd;
     border-radius: 10px;
-    background: #f9f9f9;
+    background: white;
     display: flex;
     justify-content: center;
     align-items: center;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Heatmap Button */
 .heatmap-btn {
     position: fixed;
-    right: 10px;
-    top: 10px;
-    padding: 10px 20px;
-    background-color: #007bff;
+    right: 20px;
+    bottom: 20px;
+    padding: 12px 25px;
+    background-color: #28a745;
     color: white;
     border: none;
     border-radius: 5px;
+    font-size: 14px;
     cursor: pointer;
+    transition: 0.3s ease-in-out;
 }
 
+/* Heatmap Button Hover */
 .heatmap-btn:hover {
-    background-color: #0056b3;
+    background-color: #218838;
+}
 
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+    .container {
+        width: 90%;
+        padding: 20px;
+    }
+
+    .chart-container {
+        width: 90%;
+    }
+
+    .drug-btn {
+        padding: 10px;
+        font-size: 12px;
+    }
 }

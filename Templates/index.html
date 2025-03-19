@@ -3,12 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keyword Sentiment and Topics Search</title>
+    <title>Opioid Harm Reduction Insights</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
+
 <body>
     <div class="container">
-        <h1>Search for Related Topics and Sentiments</h1>
+        <h1>Opioid Harm Reduction Insights</h1>
+        <p>Explore drug-related discussions and trends.</p>
+
+        <!-- Search Feature -->
         <form id="search-form">
             <input type="text" id="keyword" name="keyword" placeholder="Enter a keyword..." required>
             <button type="submit">Search</button>
@@ -23,60 +29,9 @@
             <h3>People Associated:</h3>
             <p id="people-result"></p>
         </div>
-    </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function () {
-    $('#search-form').on('submit', function (event) {
-        event.preventDefault();
-        const keyword = $('#keyword').val();
-
-        // Clear previous results
-        $('#results').hide();
-        $('#topics-list').empty();  // Clear the previous list of topics
-        $('#sentiment-result').empty();  // Clear the previous sentiment data
-        $('#people-result').empty();  // Clear the previous people data
-
-        $.post('/search', { keyword: keyword }, function (response) {
-            // Show the new results
-            $('#results').show();
-            $('#keyword-result').text(response.keyword);
-            
-            // Display Sentiment (Handling as an Object)
-            let sentimentHtml = '<ul>';
-            if (typeof response.sentiment === 'object') {
-                for (let sentiment in response.sentiment) {
-                    sentimentHtml += `<li>${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}: ${response.sentiment[sentiment]}</li>`;
-                }
-            } else {
-                sentimentHtml = `<p>${response.sentiment}</p>`;  // Handle as a simple string
-            }
-            sentimentHtml += '</ul>';
-            $('#sentiment-result').html(sentimentHtml);
-
-            // Populate People Associated
-            $('#people-result').text(response.associated_people);
-
-            // Populate Topics
-            $('#topics-list').empty();  // Clear any previous topics
-            response.topics.forEach(function (topic) {
-                $('#topics-list').append('<li>' + topic + '</li>');
-            });
-        });
-    });
-});
-    <title>Opioid Harm Reduction Insights</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
-    <div class="container">
-        <h1>Opioid Harm Reduction Insights</h1>
-        <p>Explore drug-related discussions and their trends.</p>
-
-        <!-- Drug Buttons -->
+        <!-- Drug Selection Section -->
+        <h2>Select a Drug:</h2>
         <div id="drug-buttons"></div>
 
         <!-- Sentiment Analysis Chart -->
@@ -90,60 +45,88 @@
             <h2 id="trend-title">Trend Analysis</h2>
             <div id="trendchart"></div>
         </div>
+
+        <!-- Heatmap Button -->
+        <button onclick="window.open('/heatmap-page', '_blank');" class="heatmap-btn">Open Heatmap</button>
     </div>
 
-    <!-- Heatmap Button -->
-    <button onclick="window.open('/heatmap-page', '_blank');" class="heatmap-btn">Open Heatmap</button>
-
+    <!-- JavaScript -->
     <script>
-        google.charts.load('current', {'packages':['corechart', 'line']});
-        google.charts.setOnLoadCallback(initialize);
-
-        function initialize() {
-            $(document).ready(function () {
-                // Fetch drug names and create buttons dynamically
-                $.getJSON('/drugs', function (drugs) {
-                    drugs.forEach(function (drug) {
-                        var button = $('<button>')
-                            .addClass('drug-btn')
-                            .text(drug)
-                            .on('click', function () {
-                                $('.drug-btn').removeClass('active');
-                                $(this).addClass('active');
-                                fetchSentiment(drug);
-                                fetchTrendData(drug);
-                            });
-                        $('#drug-buttons').append(button);
-                    });
+        $(document).ready(function () {
+            // Load drug buttons dynamically
+            $.getJSON('/drugs', function (drugs) {
+                if (drugs.length === 0) {
+                    $('#drug-buttons').html('<p>No drugs available.</p>');
+                    return;
+                }
+                drugs.forEach(function (drug) {
+                    let button = $('<button>')
+                        .addClass('drug-btn')
+                        .text(drug)
+                        .on('click', function () {
+                            $('.drug-btn').removeClass('active');
+                            $(this).addClass('active');
+                            fetchSentiment(drug);
+                            fetchTrendData(drug);
+                        });
+                    $('#drug-buttons').append(button);
                 });
             });
-        }
+
+            // Search Feature
+            $('#search-form').on('submit', function (event) {
+                event.preventDefault();
+                const keyword = $('#keyword').val();
+                
+                $('#results').hide();
+                $('#topics-list').empty();
+                $('#sentiment-result').empty();
+                $('#people-result').empty();
+
+                $.post('/search', { keyword: keyword }, function (response) {
+                    $('#results').show();
+                    $('#keyword-result').text(response.keyword);
+                    
+                    let sentimentHtml = '<ul>';
+                    if (typeof response.sentiment === 'object') {
+                        for (let sentiment in response.sentiment) {
+                            sentimentHtml += `<li>${sentiment.charAt(0).toUpperCase() + sentiment.slice(1)}: ${response.sentiment[sentiment]}</li>`;
+                        }
+                    } else {
+                        sentimentHtml = `<p>${response.sentiment}</p>`;
+                    }
+                    sentimentHtml += '</ul>';
+                    $('#sentiment-result').html(sentimentHtml);
+
+                    $('#people-result').text(response.associated_people);
+                    response.topics.forEach(topic => $('#topics-list').append('<li>' + topic + '</li>'));
+                });
+            });
+
+            // Google Charts
+            google.charts.load('current', { 'packages': ['corechart', 'line'] });
+            google.charts.setOnLoadCallback(function () {
+                console.log("Google Charts Loaded");
+            });
+
+        });
 
         function fetchSentiment(drug) {
             $('#loading-message').text(`Loading sentiment data for ${drug}...`).show();
             $.getJSON(`/drug-sentiments/${drug}`, function (data) {
                 if ($.isEmptyObject(data)) {
-                    console.warn("No sentiment data available for", drug);
                     $('#piechart').html('<p>No data available for ' + drug + '</p>');
                     return;
                 }
 
                 var dataArray = [['Sentiment', 'Count']];
                 var colors = [];
-
                 $.each(data, function (key, val) {
                     dataArray.push([key, val]);
-                    if (key.toLowerCase() === 'positive') {
-                        colors.push('#4CAF50');
-                    } else if (key.toLowerCase() === 'negative') {
-                        colors.push('#F44336');
-                    } else {
-                        colors.push('#FFC107');
-                    }
+                    colors.push(key.toLowerCase() === 'positive' ? '#4CAF50' : key.toLowerCase() === 'negative' ? '#F44336' : '#FFC107');
                 });
 
                 var dataTable = google.visualization.arrayToDataTable(dataArray);
-
                 var options = {
                     title: `Sentiment Analysis for ${drug}`,
                     width: 600,
@@ -155,7 +138,6 @@
 
                 var chart = new google.visualization.PieChart(document.getElementById('piechart'));
                 chart.draw(dataTable, options);
-
                 $('#loading-message').hide();
             }).fail(function () {
                 console.error("Failed to fetch sentiment data for " + drug);
@@ -163,43 +145,35 @@
         }
 
         function fetchTrendData(drug) {
-        console.log(`Fetching trend data for ${drug}...`);
-        $('#trend-title').text(`Trend Analysis for ${drug}`);
+            $('#trend-title').text(`Trend Analysis for ${drug}`);
+            $.getJSON(`/trend-data/${drug}`, function (data) {
+                if (data.length === 0) {
+                    $('#trendchart').html('<p>No trend data available for ' + drug + '</p>');
+                    return;
+                }
 
-        $.getJSON(`/trend-data/${drug}`, function (data) {
-            if (data.length === 0) {
-                console.warn("No trend data available for", drug);
-                $('#trendchart').html('<p>No trend data available for ' + drug + '</p>');
-                return;
-            }
+                var dataArray = [['Year', 'Mentions']];
+                data.forEach(entry => dataArray.push([entry.year.toString(), entry.mentions]));
 
-            console.log("Trend data received:", data); // ✅ Debugging line
+                var dataTable = google.visualization.arrayToDataTable(dataArray);
+                var options = {
+                    title: `Opioid Mentions for ${drug} Over Time`,
+                    curveType: 'function',
+                    legend: { position: 'bottom' },
+                    width: 800,
+                    height: 400,
+                    hAxis: { title: 'Year', format: '####' },
+                    vAxis: { title: 'Mentions' },
+                    chartArea: { width: '70%', height: '70%' }
+                };
 
-            var dataArray = [['Year', 'Mentions']];
-            data.forEach(function (entry) {
-                dataArray.push([entry.year.toString(), entry.mentions]);
+                var chart = new google.visualization.LineChart(document.getElementById('trendchart'));
+                chart.draw(dataTable, options);
+            }).fail(function () {
+                console.error("Failed to fetch trend data for " + drug);
+                $('#trendchart').html('<p>Error loading trend data.</p>');
             });
-
-            var dataTable = google.visualization.arrayToDataTable(dataArray);
-
-            var options = {
-                title: `Opioid Mentions for ${drug} Over Time`,
-                curveType: 'function',
-                legend: { position: 'bottom' },
-                width: 800,
-                height: 400,
-                hAxis: { title: 'Year', format: '####' }, // ✅ Ensure year format is correct
-                vAxis: { title: 'Mentions' },
-                chartArea: { width: '70%', height: '70%' }
-            };
-
-            var chart = new google.visualization.LineChart(document.getElementById('trendchart'));
-            chart.draw(dataTable, options);
-        }).fail(function () {
-            console.error("Failed to fetch trend data for " + drug);
-            $('#trendchart').html('<p>Error loading trend data.</p>');
-        });
-    }
+        }
     </script>
 </body>
 </html>

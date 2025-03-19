@@ -1,4 +1,6 @@
-
+#!/bin/sh
+'''exec' "/Users/nidhipatel/Desktop/Classes/Winter25/Experiential Learning/Personal-Drug-Overdose-Harm-Reduction/myenv/bin/python" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys
